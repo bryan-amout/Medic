@@ -1,10 +1,21 @@
 from django.shortcuts import render, redirect
-from medicoapp.models import Contact, Application
+from medicoapp.models import Contact, Application, member
 from medicoapp.forms import ApplicationForm
 
 # Create your views here.
 def index(request):
-    return render(request,'index.html')
+    if request.method == 'POST':
+        if member.objects.filter(username=request.POST['username'], password=request.POST['password']).exists():
+            Members = member.objects.get(
+                username=request.POST['username'],
+                password=request.POST['password']
+                )
+            return render(request, 'index.html',{'members':Members})
+        else:
+            return render(request, 'login.html')
+    else:
+        return render(request, 'login.html')
+
 def inner(request):
     return render(request,'inner-page.html')
 def about(request):
@@ -39,7 +50,7 @@ def application(request):
         all.save()
         return redirect('/show')
     else:
-        return render(request,'Application.html')
+        return render(request,'application.html')
 
 
 
@@ -54,8 +65,8 @@ def delete(request,id):
     return redirect('/show')
 
 def edit(request,id):
-    myapplication = Application.objects.get(id = id)
-    return render(request,'edit.html',{'x':myapplication})
+    appointments = Application.objects.get(id = id)
+    return render(request,'edit.html',{'x':application})
 def update(request,id):
     if request.method == 'POST':
         applications = Application.objects.get(id=id)
@@ -68,6 +79,18 @@ def update(request,id):
     else:
         return render(request,'edit.html')
 def register(request):
-    return render(request,'register.html')
+    if request.method == 'POST':
+        members = member(
+            name=request.POST['name'],
+            username=request.POST['username'],
+            password=request.POST['password']
+        )
+        members.save()
+        return redirect('/login')
+    else:
+        return render(request,'register.html')
+
+
 def login(request):
     return render(request,'login.html')
+
